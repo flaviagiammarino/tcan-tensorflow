@@ -17,30 +17,32 @@ kaleido==0.2.1
 ### Usage
 ```python
 import numpy as np
-from deep_tcn_tensorflow.model import DeepTCN
+from tcan_tensorflow.model import TCAN
 
 # Generate two time series
 N = 1000
 t = np.linspace(0, 1, N)
 e = np.random.multivariate_normal(mean=[0, 0], cov=[[1, 0.25], [0.25, 1]], size=N)
-a = 40 + 30 * t + 20 * np.cos(2 * np.pi * (10 * t - 0.5)) + e[:, 0]
-b = 50 + 40 * t + 30 * np.sin(2 * np.pi * (20 * t - 0.5)) + e[:, 1]
+a = 40 + 30 * t + 20 * np.cos(2 * np.pi * (20 * t - 0.5)) + e[:, 0]
+b = 50 - 40 * t + 30 * np.sin(2 * np.pi * (20 * t - 0.5)) + e[:, 1]
 y = np.hstack([a.reshape(- 1, 1), b.reshape(- 1, 1)])
 
 # Fit the model
-model = DeepTCN(
+model = TCAN(
     y=y,
     x=None,
     forecast_period=100,
-    lookback_period=200,
+    lookback_period=300,
     quantiles=[0.01, 0.1, 0.5, 0.9, 0.99],
-    filters=4,
+    filters=2,
     kernel_size=3,
     dilation_rates=[1, 2],
-    loss='nonparametric'
+    dropout=0,
+    alpha=1.5
 )
 
 model.fit(
+    regularization=0.5,
     learning_rate=0.01,
     batch_size=64,
     epochs=200,
@@ -58,6 +60,6 @@ fig.write_image('predictions.png', width=750, height=650)
 # Plot the out of sample forecasts
 forecasts = model.forecast()
 fig = model.plot_forecasts()
-fig.write_image('forecasts.png', width=750, height=650)
+fig.write_image('forecasts.png', width=750, height=650)0)
 ```
 ![forecasts](example/forecasts.png)
