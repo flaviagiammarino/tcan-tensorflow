@@ -29,7 +29,7 @@ def entmax(z, alpha, n_iter=100):
     '''
 
     if alpha < 1:
-        raise ValueError('The sparsity parameter should greater than or equal to 1.')
+        raise ValueError('The sparsity parameter should be greater than or equal to 1.')
 
     elif alpha == 1:
         # Calculate the softmax probabilities.

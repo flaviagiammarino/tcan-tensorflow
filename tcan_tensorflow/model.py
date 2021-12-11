@@ -51,13 +51,13 @@ class TCAN():
             Quantiles of target time series to be predicted.
 
         filters: int.
-            Number of filters (or channels) of the convolutional layers in the encoder module.
+            Number of filters (or channels) of the convolutional layers.
 
         kernel_size: int.
-            Kernel size of the convolutional layers in the encoder module.
+            Kernel size of the convolutional layers.
 
         dilation_rates: list.
-            Dilation rates of the convolutional layers in the encoder module.
+            Dilation rates of the convolutional layers.
 
         dropout: float.
             Dropout rate.
@@ -303,8 +303,8 @@ class TCAN():
         Parameters:
         __________________________________
         x: np.array.
-            Features time series, array with shape (n_forecast, n_features) where n_forecast is the decoder length
-            and n_features is the number of features time series.
+            Features time series, array with shape (n_forecast, n_features) where n_forecast is the number of future
+            time steps to forecast and n_features is the number of features time series.
 
         Returns:
         __________________________________
@@ -434,13 +434,13 @@ def build_fn(
         Encoder length.
 
     filters: int.
-        Number of filters (or channels) of the convolutional layers in the encoder module.
+        Number of filters (or channels) of the convolutional layers.
 
     kernel_size: int.
-        Kernel size of the convolutional layers in the encoder module.
+        Kernel size of the convolutional layers.
 
     dilation_rate: int.
-        Dilation rates of the convolutional layers in the encoder module.
+        Dilation rates of the convolutional layers.
 
     dropout: float.
         Dropout rate.
@@ -515,13 +515,13 @@ def build_fn_with_covariates(
         Encoder length.
 
     filters: int.
-        Number of filters (or channels) of the convolutional layers in the encoder module.
+        Number of filters (or channels) of the convolutional layers.
 
     kernel_size: int.
-        Kernel size of the convolutional layers in the encoder module.
+        Kernel size of the convolutional layers.
 
     dilation_rate: int.
-        Dilation rates of the convolutional layers in the encoder module.
+        Dilation rates of the convolutional layers.
 
     dropout: float.
         Dropout rate.
@@ -578,7 +578,7 @@ def build_fn_with_covariates(
 def softplus(x):
     '''
     Softplus activation function, used for ensuring the positivity of the standard deviation of the Normal distribution.
-    See Section
+    See Section IV.B in the TCAN paper.
     '''
     return tf.math.log(1.0 + tf.math.exp(x))
 

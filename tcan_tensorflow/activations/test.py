@@ -5,6 +5,7 @@ Sparse sequence-to-sequence models. https://arxiv.org/abs/1905.05702.
 
 import numpy as np
 import plotly.graph_objects as go
+
 from tcan_tensorflow.activations.activations import entmax
 
 # Define the values of the sparsity parameter and the corresponding legend items.

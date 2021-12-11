@@ -4,8 +4,9 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Attention
-from tcan_tensorflow.layers.layers import SparseAttention
 warnings.filterwarnings('ignore')
+
+from tcan_tensorflow.layers.layers import SparseAttention
 
 # Parameters.
 seed = 1
