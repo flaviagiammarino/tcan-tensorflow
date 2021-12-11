@@ -439,7 +439,7 @@ def build_fn(
     kernel_size: int.
         Kernel size of the convolutional layers.
 
-    dilation_rate: int.
+    dilation_rates: list.
         Dilation rates of the convolutional layers.
 
     dropout: float.
@@ -520,7 +520,7 @@ def build_fn_with_covariates(
     kernel_size: int.
         Kernel size of the convolutional layers.
 
-    dilation_rate: int.
+    dilation_rates: list.
         Dilation rates of the convolutional layers.
 
     dropout: float.
