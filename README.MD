@@ -1,5 +1,5 @@
 ## TCAN TensorFlow
-TensorFlow (Python) implementation of multivariate time series forecasting model introduced in Lin, Y., Koprinska, I., 
+TensorFlow implementation of multivariate time series forecasting model introduced in Lin, Y., Koprinska, I., 
 & Rana, M. (2021). Temporal Convolutional Attention Neural Networks for Time Series Forecasting. In 2021 International
 Joint Conference on Neural Networks (IJCNN) (pp. 1-8). IEEE. 
 [https://doi.org/10.1109/IJCNN52387.2021.9534351](https://doi.org/10.1109/IJCNN52387.2021.9534351).
