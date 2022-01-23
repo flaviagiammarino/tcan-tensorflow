@@ -33,18 +33,18 @@ class TCAN():
 
         Parameters:
         __________________________________
-        y: np.array
+        y: np.array.
             Target time series, array with shape (n_samples, n_targets) where n_samples is the length of the time series
             and n_targets is the number of target time series.
 
-        x: np.array
+        x: np.array.
             Features time series, array with shape (n_samples, n_features) where n_samples is the length of the time series
             and n_features is the number of features time series.
 
-        forecast_period: int
+        forecast_period: int.
             Number of future time steps to forecast.
 
-        lookback_period: int
+        lookback_period: int.
             Number of past time steps to use as input.
 
         quantiles: list.
@@ -148,7 +148,7 @@ class TCAN():
                 n_lookback=self.n_lookback,
             )
 
-            # Build the model graph.
+            # Build the model.
             self.model = build_fn_with_covariates(
                 n_targets=self.n_targets,
                 n_features=self.n_features,
@@ -170,7 +170,7 @@ class TCAN():
                 n_lookback=self.n_lookback,
             )
 
-            # Build the model graph.
+            # Build the model.
             self.model = build_fn(
                 n_targets=self.n_targets,
                 n_lookback=self.n_lookback,
@@ -254,7 +254,7 @@ class TCAN():
 
         Returns:
         __________________________________
-        predictions: pd.DataFrame
+        predictions: pd.DataFrame.
             Data frame including the actual values of the time series and the predicted quantiles.
         '''
 
@@ -308,7 +308,7 @@ class TCAN():
 
         Returns:
         __________________________________
-        forecasts: pd.DataFrame
+        forecasts: pd.DataFrame.
             Data frame including the actual values of the time series and the predicted quantiles.
         '''
 
@@ -394,9 +394,10 @@ class TCAN():
 
         '''
         Plot the in-sample predictions.
+
         Returns:
         __________________________________
-        go.Figure
+        go.Figure.
         '''
 
         return plot(self.predictions, self.q, self.n_targets, self.n_quantiles)
@@ -405,9 +406,10 @@ class TCAN():
 
         '''
         Plot the out-of-sample forecasts.
+
         Returns:
         __________________________________
-        go.Figure
+        go.Figure.
         '''
 
         return plot(self.forecasts, self.q, self.n_targets, self.n_quantiles)
@@ -423,14 +425,14 @@ def build_fn(
         alpha):
 
     '''
-    Build the model graph.
+    Build the model.
 
     Parameters:
     __________________________________
-    n_targets: int
+    n_targets: int.
         Number of target time series.
 
-    n_lookback: int
+    n_lookback: int.
         Encoder length.
 
     filters: int.
@@ -501,17 +503,17 @@ def build_fn_with_covariates(
         alpha):
 
     '''
-    Build the model graph with covariates.
+    Build the model with covariates.
 
     Parameters:
     __________________________________
-    n_targets: int
+    n_targets: int.
         Number of target time series.
 
     n_features: int.
         Number of features time series.
 
-    n_lookback: int
+    n_lookback: int.
         Encoder length.
 
     filters: int.
@@ -576,14 +578,19 @@ def build_fn_with_covariates(
 
 
 def softplus(x):
+
     '''
     Softplus activation function, used for ensuring the positivity of the standard deviation of the Normal distribution.
     See Section IV.B in the TCAN paper.
     '''
+
     return tf.math.log(1.0 + tf.math.exp(x))
 
+
 def norm_ppf(loc, scale, value):
+
     '''
     Quantiles of the Normal distribution.
     '''
+
     return tfp.distributions.Normal(loc, scale).quantile(value).numpy().flatten()

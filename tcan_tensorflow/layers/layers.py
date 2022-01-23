@@ -57,5 +57,6 @@ class SparseAttention(Layer):
 
         if return_attention_scores:
             return outputs, weights
+
         else:
             return outputs

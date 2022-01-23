@@ -8,10 +8,10 @@ def entmax(z, alpha, n_iter=100):
 
     Parameters:
     __________________________________
-    z: tf.Tensor
+    z: tf.Tensor.
         Logits.
 
-    alpha: float
+    alpha: float.
         Entmax parameter.
 
     n_iter: int.
@@ -19,7 +19,7 @@ def entmax(z, alpha, n_iter=100):
 
     Returns:
     __________________________________
-    tf.Tensor
+    tf.Tensor.
         Probabilities.
 
     References:
