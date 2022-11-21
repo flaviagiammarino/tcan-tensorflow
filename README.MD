@@ -1,9 +1,7 @@
 # TCAN TensorFlow
 
-![license](https://img.shields.io/github/license/flaviagiammarino/tcan-tensorflow?color=green)
-![languages](https://img.shields.io/github/languages/top/flaviagiammarino/tcan-tensorflow?color=blue)
-![stars](https://img.shields.io/github/stars/flaviagiammarino/tcan-tensorflow?color=yellow)
-![forks](https://img.shields.io/github/forks/flaviagiammarino/tcan-tensorflow?color=orange)
+![license](https://img.shields.io/github/license/flaviagiammarino/tcan-tensorflow?color=9b72e5)
+![languages](https://img.shields.io/github/languages/top/flaviagiammarino/tcan-tensorflow?color=3672be)
 
 TensorFlow implementation of multivariate time series forecasting model introduced in Lin, Y., Koprinska, I., 
 and Rana, M. (2021). Temporal Convolutional Attention Neural Networks for Time Series Forecasting. In *2021 International
