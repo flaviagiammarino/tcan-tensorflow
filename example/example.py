@@ -14,19 +14,19 @@ model = TCAN(
     y=y,
     x=None,
     forecast_period=100,
-    lookback_period=300,
+    lookback_period=200,
     quantiles=[0.01, 0.1, 0.5, 0.9, 0.99],
-    filters=2,
-    kernel_size=3,
-    dilation_rates=[1, 2],
+    filters=32,
+    kernel_size=7,
+    dilation_rates=[1, 2, 4],
     dropout=0,
     alpha=1.5
 )
 
 model.fit(
     regularization=0.5,
-    learning_rate=0.01,
-    batch_size=64,
+    learning_rate=0.001,
+    batch_size=32,
     epochs=200,
     verbose=1
 )

@@ -35,16 +35,16 @@ def encoder(encoder_input, filters, kernel_size, dilation_rate, dropout):
         the encoder length and filters is the number of channels of the convolutional layers.
     '''
 
-    encoder_output = WeightNormalization(Conv1D(filters=filters, kernel_size=kernel_size, dilation_rate=dilation_rate, padding='causal'))(encoder_input)
+    encoder_output = WeightNormalization(Conv1D(filters=filters, kernel_size=kernel_size, dilation_rate=dilation_rate, padding='causal'), data_init=False)(encoder_input)
     encoder_output = ReLU()(encoder_output)
     encoder_output = Dropout(rate=dropout)(encoder_output)
 
-    encoder_output = WeightNormalization(Conv1D(filters=filters, kernel_size=kernel_size, dilation_rate=dilation_rate, padding='causal'))(encoder_output)
+    encoder_output = WeightNormalization(Conv1D(filters=filters, kernel_size=kernel_size, dilation_rate=dilation_rate, padding='causal'), data_init=False)(encoder_output)
     encoder_output = ReLU()(encoder_output)
     encoder_output = Dropout(rate=dropout)(encoder_output)
 
     if encoder_input.shape[-1] != encoder_output.shape[-1]:
-        encoder_input = Conv1D(filters=1, kernel_size=1)(encoder_input)
+        encoder_input = Conv1D(filters=filters, kernel_size=1)(encoder_input)
 
     encoder_output = Add()([encoder_input, encoder_output])
 

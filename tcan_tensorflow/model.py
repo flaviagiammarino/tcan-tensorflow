@@ -66,47 +66,6 @@ class TCAN():
             Entmax parameter.
         '''
 
-        if type(y) != np.ndarray:
-            raise ValueError('The target time series must be provided as a numpy array.')
-
-        elif np.isnan(y).sum() != 0:
-            raise ValueError('The target time series cannot contain missing values.')
-
-        if len(y.shape) > 2:
-            raise ValueError('The targets array cannot have more than 2 dimensions. Found {} dimensions.'.format(len(y.shape)))
-
-        elif len(y.shape) == 1:
-            y = np.expand_dims(y, axis=1)
-
-        if x is not None:
-
-            if type(x) != np.ndarray:
-                raise ValueError('The features time series must be provided as a numpy array.')
-
-            elif np.isnan(x).sum() != 0:
-                raise ValueError('The features time series cannot contain missing values.')
-
-            if len(x.shape) > 2:
-                raise ValueError('The features array cannot have more than 2 dimensions. Found {} dimensions.'.format(len(x.shape)))
-
-            elif len(x.shape) == 1:
-                x = np.expand_dims(x, axis=1)
-
-            if y.shape[0] != x.shape[0]:
-                raise ValueError('The targets and features time series must have the same length.')
-
-        if type(dilation_rates) != list:
-            raise ValueError('The dilation rates must be provided as a list.')
-
-        elif len(dilation_rates) == 0:
-            raise ValueError('No dilation rates were provided.')
-
-        if type(quantiles) != list:
-            raise ValueError('The quantiles must be provided as a list.')
-
-        elif len(quantiles) == 0:
-            raise ValueError('No quantiles were provided.')
-
         # Extract the quantiles.
         q = np.unique(np.array(quantiles))
         if 0.5 not in q:
@@ -311,23 +270,6 @@ class TCAN():
         forecasts: pd.DataFrame.
             Data frame including the actual values of the time series and the predicted quantiles.
         '''
-
-        if x is not None:
-
-            if type(x) != np.ndarray:
-                raise ValueError('The features time series must be provided as a numpy array.')
-
-            elif np.isnan(x).sum() != 0:
-                raise ValueError('The features time series cannot contain missing values.')
-
-            if len(x.shape) == 1:
-                x = np.expand_dims(x, axis=1)
-
-            elif len(x.shape) > 2:
-                raise ValueError('The features array cannot have more than 2 dimensions. Found {} dimensions.'.format(len(x.shape)))
-
-            if x.shape[0] != self.n_forecast:
-                raise ValueError('The length of the features time series must be equal to the length of the forecast period.')
 
         if self.x is not None:
 

@@ -10,12 +10,12 @@ Joint Conference on Neural Networks (IJCNN)* (pp. 1-8). IEEE.
 
 ## Dependencies
 ```bash
-pandas==1.3.4
-numpy==1.19.5
-tensorflow==2.7.0
-tensorflow_probability==0.14.1
-tensorflow_addons==0.15.0
-plotly==5.3.1
+pandas==1.5.1
+numpy==1.23.3
+tensorflow==2.9.1
+tensorflow_probability==0.17.0
+tensorflow_addons==0.17.1
+plotly==5.10.0
 kaleido==0.2.1
 ```
 ## Usage
@@ -36,19 +36,19 @@ model = TCAN(
     y=y,
     x=None,
     forecast_period=100,
-    lookback_period=300,
+    lookback_period=200,
     quantiles=[0.01, 0.1, 0.5, 0.9, 0.99],
-    filters=2,
-    kernel_size=3,
-    dilation_rates=[1, 2],
+    filters=32,
+    kernel_size=7,
+    dilation_rates=[1, 2, 4],
     dropout=0,
     alpha=1.5
 )
 
 model.fit(
     regularization=0.5,
-    learning_rate=0.01,
-    batch_size=64,
+    learning_rate=0.001,
+    batch_size=32,
     epochs=200,
     verbose=1
 )
