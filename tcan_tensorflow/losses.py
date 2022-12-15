@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-def NLL(y_true, y_pred):
+def negative_loglikelihood(y_true, y_pred):
 
     '''
     Negative Log-Likelihood, see Section IV.B in the TCAN paper.
@@ -32,7 +32,7 @@ def NLL(y_true, y_pred):
     return tf.experimental.numpy.nanmean(tf.experimental.numpy.nansum(L, axis=-1))
 
 
-def MAE(y_true, y_pred):
+def mean_absolute_error(y_true, y_pred):
 
     '''
     Mean Absolute Error, see Section IV.B in the TCAN paper.
@@ -59,4 +59,4 @@ def MAE(y_true, y_pred):
 
     L = tf.abs(y_true - y_pred)
 
-    return tf.experimental.numpy.nanmean(tf.experimental.numpy.nansum(L, axis=-1))
+    return tf.reduce_mean(tf.reduce_sum(L, axis=-1))

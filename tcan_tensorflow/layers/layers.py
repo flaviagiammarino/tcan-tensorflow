@@ -1,9 +1,8 @@
 import tensorflow as tf
-from tensorflow.keras.layers import Layer
 
 from tcan_tensorflow.activations.activations import entmax
 
-class SparseAttention(Layer):
+class SparseAttention(tf.keras.layers.Layer):
 
     def __init__(self, alpha=1.5):
 

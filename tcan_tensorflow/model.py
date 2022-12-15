@@ -2,15 +2,11 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
-from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.layers import Input, Dense, Concatenate, Reshape
 pd.options.mode.chained_assignment = None
 
 from tcan_tensorflow.modules import encoder, decoder
 from tcan_tensorflow.utils import get_training_sequences_with_covariates, get_training_sequences
-from tcan_tensorflow.losses import NLL, MAE
-from tcan_tensorflow.plots import plot
+from tcan_tensorflow.losses import negative_loglikelihood, mean_absolute_error
 
 class TCAN():
 
@@ -29,7 +25,7 @@ class TCAN():
         '''
         Implementation of multivariate time series forecasting model introduced in Lin, Y., Koprinska, I., & Rana, M.
         (2021). Temporal Convolutional Attention Neural Networks for Time Series Forecasting. In 2021 International
-        Joint Conference on Neural Networks (IJCNN) (pp. 1-8). IEEE. https://doi.org/10.1109/IJCNN52387.2021.9534351.
+        Joint Conference on Neural Networks (IJCNN) (pp. 1-8). IEEE.
 
         Parameters:
         __________________________________
@@ -174,8 +170,8 @@ class TCAN():
 
         # Compile the model.
         self.model.compile(
-            optimizer=Adam(learning_rate=learning_rate),
-            loss=lambda y_true, y_pred: regularization * NLL(y_true, y_pred) + MAE(y_true, y_pred),
+            optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+            loss=lambda y_true, y_pred: regularization * negative_loglikelihood(y_true, y_pred) + mean_absolute_error(y_true, y_pred),
         )
 
         # Fit the model.
@@ -201,104 +197,50 @@ class TCAN():
                 verbose=verbose
             )
 
-    def predict(self, index):
-
+    def forecast(self, y, x=None):
+    
         '''
-        Extract the in-sample predictions.
-
+        Generate the forecasts.
         Parameters:
         __________________________________
-        index: int.
-            The start index of the sequence to predict.
+        y: np.array.
+            Past values of target time series, array with shape (n_samples, n_targets) where n_samples is the length
+            of the time series and n_targets is the number of target time series. The number of past samples provided
+            (n_samples) should not be less than the length of the lookback period.
 
-        Returns:
-        __________________________________
-        predictions: pd.DataFrame.
-            Data frame including the actual values of the time series and the predicted quantiles.
-        '''
-
-        if index < self.n_lookback:
-            raise ValueError('The index must be greater than {}.'.format(self.n_lookback))
-
-        elif index > len(self.y) - self.n_forecast:
-            raise ValueError('The index must be less than {}.'.format(self.n_samples - self.n_forecast))
-
-        # Extract the predictions for the selected sequence.
-        if self.x is not None:
-            y_pred = self.model.predict([self.x_encoder, self.y_encoder])
-        else:
-            y_pred = self.model.predict(self.y_encoder)
-
-        y_pred = y_pred[index - self.n_lookback: index - self.n_lookback + self.n_forecast, :, :]
-
-        # Organize the predictions in a data frame.
-        columns = ['time_idx']
-        columns.extend(['target_' + str(i + 1) for i in range(self.n_targets)])
-        columns.extend(['target_' + str(i + 1) + '_' + str(self.q[j]) for i in range(self.n_targets) for j in range(self.n_quantiles)])
-
-        predictions = pd.DataFrame(columns=columns)
-        predictions['time_idx'] = np.arange(self.n_samples)
-
-        for i in range(self.n_targets):
-            predictions['target_' + str(i + 1)] = self.y_min[i] + (self.y_max[i] - self.y_min[i]) * self.y[:, i]
-
-            for j in range(self.n_quantiles):
-                predictions['target_' + str(i + 1) + '_' + str(self.q[j])].iloc[index: index + self.n_forecast] = \
-                self.y_min[i] + (self.y_max[i] - self.y_min[i]) * norm_ppf(y_pred[:, i, 0], y_pred[:, i, 1], self.q[j])
-
-        predictions = predictions.astype(float)
-
-        # Save the data frame.
-        self.predictions = predictions
-
-        # Return the data frame.
-        return predictions
-
-    def forecast(self, x=None):
-
-        '''
-        Generate the out-of-sample forecasts.
-
-        Parameters:
-        __________________________________
         x: np.array.
-            Features time series, array with shape (n_forecast, n_features) where n_forecast is the number of future
-            time steps to forecast and n_features is the number of features time series.
-
+            Past and future values of features time series, array with shape (n_samples + n_forecast, n_features) where
+            n_samples is the length of the time series, n_forecast is the decoder length and n_features is the number
+            of features time series. The number of past samples provided (n_samples) should not be less than the length
+            of the lookback period.
         Returns:
         __________________________________
         forecasts: pd.DataFrame.
             Data frame including the actual values of the time series and the predicted quantiles.
         '''
 
-        if self.x is not None:
+        # Scale the data.
+        y = (y - self.y_min) / (self.y_max - self.y_min)
 
-            # Append the future features values to the past values.
+        if x is not None:
             x = (x - self.x_min) / (self.x_max - self.x_min)
-            x = np.vstack([self.x, x])
 
-            # Generate the new features sequences.
-            x_encoder = np.zeros((self.n_samples + self.n_forecast, self.n_lookback, self.n_features))
-
-            for i in range(self.n_lookback, x.shape[0]):
-                x_encoder[i, :, :] = x[i - self.n_lookback + 1: i + 1, :]
-
-            # Keep only the future features sequences.
-            x_encoder = x_encoder[- self.n_forecast:, :, :]
-
-        # Extract the last observed target sequence.
-        y_decoder = np.reshape(self.y[- self.n_lookback:, :], (1, self.n_lookback, self.n_targets))
-
-        # Generate the multi-step forecasts.
+        # Reshape the data.
+        y_decoder = np.reshape(y[- self.n_lookback:, :], (1, self.n_lookback, self.n_targets))
+        
+        if x is not None:
+            x_encoder = np.array([x[i - self.n_lookback: i, :] for i in range(x.shape[0] - self.n_forecast, x.shape[0])])
+  
+        # Generate the forecasts.
         y_pred = []
 
         for i in range(self.n_forecast):
 
             # Generate the one-step-ahead forecast.
-            if self.x is not None:
-                y_future = self.model.predict([x_encoder[i: i + 1, :, :], y_decoder])
+            if x is not None:
+                y_future = self.model([x_encoder[i: i + 1, :, :], y_decoder]).numpy()
             else:
-                y_future = self.model.predict(y_decoder)
+                y_future = self.model(y_decoder).numpy()
 
             # Feed the mean forecast back to the model as an input.
             y_decoder = np.append(y_decoder[:, 1:, :], y_future[:, :, 0].reshape(1, 1, self.n_targets), axis=1)
@@ -313,48 +255,19 @@ class TCAN():
         columns.extend(['target_' + str(i + 1) for i in range(self.n_targets)])
         columns.extend(['target_' + str(i + 1) + '_' + str(self.q[j]) for i in range(self.n_targets) for j in range(self.n_quantiles)])
 
-        forecasts = pd.DataFrame(columns=columns)
-        forecasts['time_idx'] = np.arange(self.n_samples + self.n_forecast)
+        df = pd.DataFrame(columns=columns)
+        df['time_idx'] = np.arange(self.n_samples + self.n_forecast)
 
         for i in range(self.n_targets):
-            forecasts['target_' + str(i + 1)].iloc[: - self.n_forecast] = \
+            df['target_' + str(i + 1)].iloc[: - self.n_forecast] = \
                 self.y_min[i] + (self.y_max[i] - self.y_min[i]) * self.y[:, i]
 
             for j in range(self.n_quantiles):
-                forecasts['target_' + str(i + 1) + '_' + str(self.q[j])].iloc[- self.n_forecast:] = \
+                df['target_' + str(i + 1) + '_' + str(self.q[j])].iloc[- self.n_forecast:] = \
                 self.y_min[i] + (self.y_max[i] - self.y_min[i]) * norm_ppf(y_pred[:, i, 0], y_pred[:, i, 1], self.q[j])
 
-        forecasts = forecasts.astype(float)
-
-        # Save the data frame.
-        self.forecasts = forecasts
-
         # Return the data frame.
-        return forecasts
-
-    def plot_predictions(self):
-
-        '''
-        Plot the in-sample predictions.
-
-        Returns:
-        __________________________________
-        go.Figure.
-        '''
-
-        return plot(self.predictions, self.q, self.n_targets, self.n_quantiles)
-
-    def plot_forecasts(self):
-
-        '''
-        Plot the out-of-sample forecasts.
-
-        Returns:
-        __________________________________
-        go.Figure.
-        '''
-
-        return plot(self.forecasts, self.q, self.n_targets, self.n_quantiles)
+        return df.astype(float)
 
 
 def build_fn(
@@ -394,7 +307,7 @@ def build_fn(
     '''
 
     # Define the inputs.
-    x = Input(shape=(n_lookback, n_targets))
+    x = tf.keras.layers.Input(shape=(n_lookback, n_targets))
 
     # Forward pass the inputs through the encoder module.
     for i in range(len(dilation_rates)):
@@ -423,15 +336,15 @@ def build_fn(
     decoder_output = decoder(encoder_output, alpha)
 
     # Calculate the means and standard deviations.
-    y1 = Dense(units=n_targets)(decoder_output)
-    y2 = softplus(Dense(units=n_targets)(decoder_output))
+    y1 = tf.keras.layers.Dense(units=n_targets)(decoder_output)
+    y2 = softplus(tf.keras.layers.Dense(units=n_targets)(decoder_output))
 
     # Reshape the output to match the shape required by the loss function.
-    y1 = Reshape(target_shape=(n_targets, 1))(y1)
-    y2 = Reshape(target_shape=(n_targets, 1))(y2)
-    y = Concatenate()([y1, y2])
+    y1 = tf.keras.layers.Reshape(target_shape=(n_targets, 1))(y1)
+    y2 = tf.keras.layers.Reshape(target_shape=(n_targets, 1))(y2)
+    y = tf.keras.layers.Concatenate()([y1, y2])
 
-    return Model(x, y)
+    return tf.keras.models.Model(x, y)
 
 
 def build_fn_with_covariates(
@@ -475,11 +388,11 @@ def build_fn_with_covariates(
     '''
 
     # Define the inputs.
-    x1 = Input(shape=(n_lookback, n_features))
-    x2 = Input(shape=(n_lookback, n_targets))
+    x1 = tf.keras.layers.Input(shape=(n_lookback, n_features))
+    x2 = tf.keras.layers.Input(shape=(n_lookback, n_targets))
 
     # Concatenate the inputs.
-    encoder_input = Concatenate()([x1, x2])
+    encoder_input = tf.keras.layers.Concatenate()([x1, x2])
 
     # Forward pass the inputs through the encoder module.
     for i in range(len(dilation_rates)):
@@ -508,15 +421,15 @@ def build_fn_with_covariates(
     decoder_output = decoder(encoder_output, alpha)
 
     # Calculate the means and standard deviations.
-    y1 = Dense(units=n_targets)(decoder_output)
-    y2 = softplus(Dense(units=n_targets)(decoder_output))
+    y1 = tf.keras.layers.Dense(units=n_targets)(decoder_output)
+    y2 = softplus(tf.keras.layers.Dense(units=n_targets)(decoder_output))
 
     # Reshape the output to match the shape required by the loss function.
-    y1 = Reshape(target_shape=(n_targets, 1))(y1)
-    y2 = Reshape(target_shape=(n_targets, 1))(y2)
-    y = Concatenate()([y1, y2])
+    y1 = tf.keras.layers.Reshape(target_shape=(n_targets, 1))(y1)
+    y2 = tf.keras.layers.Reshape(target_shape=(n_targets, 1))(y2)
+    y = tf.keras.layers.Concatenate()([y1, y2])
 
-    return Model([x1, x2], y)
+    return tf.keras.models.Model([x1, x2], y)
 
 
 def softplus(x):

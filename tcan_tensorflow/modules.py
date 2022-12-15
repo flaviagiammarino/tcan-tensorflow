@@ -1,5 +1,5 @@
-from tensorflow.keras.layers import Conv1D, ReLU, Dropout, Add, Concatenate, Reshape
-from tensorflow_addons.layers import WeightNormalization
+import tensorflow as tf
+import tensorflow_addons as tfa
 
 from tcan_tensorflow.layers.layers import SparseAttention
 
@@ -35,18 +35,18 @@ def encoder(encoder_input, filters, kernel_size, dilation_rate, dropout):
         the encoder length and filters is the number of channels of the convolutional layers.
     '''
 
-    encoder_output = WeightNormalization(Conv1D(filters=filters, kernel_size=kernel_size, dilation_rate=dilation_rate, padding='causal'), data_init=False)(encoder_input)
-    encoder_output = ReLU()(encoder_output)
-    encoder_output = Dropout(rate=dropout)(encoder_output)
+    encoder_output = tfa.layers.WeightNormalization(tf.keras.layers.Conv1D(filters=filters, kernel_size=kernel_size, dilation_rate=dilation_rate, padding='causal'), data_init=False)(encoder_input)
+    encoder_output = tf.keras.layers.ReLU()(encoder_output)
+    encoder_output = tf.keras.layers.Dropout(rate=dropout)(encoder_output)
 
-    encoder_output = WeightNormalization(Conv1D(filters=filters, kernel_size=kernel_size, dilation_rate=dilation_rate, padding='causal'), data_init=False)(encoder_output)
-    encoder_output = ReLU()(encoder_output)
-    encoder_output = Dropout(rate=dropout)(encoder_output)
+    encoder_output = tfa.layers.WeightNormalization(tf.keras.layers.Conv1D(filters=filters, kernel_size=kernel_size, dilation_rate=dilation_rate, padding='causal'), data_init=False)(encoder_output)
+    encoder_output = tf.keras.layers.ReLU()(encoder_output)
+    encoder_output = tf.keras.layers.Dropout(rate=dropout)(encoder_output)
 
     if encoder_input.shape[-1] != encoder_output.shape[-1]:
-        encoder_input = Conv1D(filters=filters, kernel_size=1)(encoder_input)
+        encoder_input = tf.keras.layers.Conv1D(filters=filters, kernel_size=1)(encoder_input)
 
-    encoder_output = Add()([encoder_input, encoder_output])
+    encoder_output = tf.keras.layers.Add()([encoder_input, encoder_output])
 
     return encoder_output
 
@@ -83,6 +83,6 @@ def decoder(encoder_output, alpha):
     c = SparseAttention(alpha=alpha)(inputs=[q, v])
 
     # Concatenate the context vector with the query matrix (current step).
-    decoder_output = Concatenate()([c, q])
+    decoder_output = tf.keras.layers.Concatenate()([c, q])
 
     return decoder_output

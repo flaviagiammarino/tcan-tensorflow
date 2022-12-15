@@ -1,43 +1,45 @@
 # TCAN TensorFlow
 
-![license](https://img.shields.io/github/license/flaviagiammarino/tcan-tensorflow?color=9b72e5)
-![languages](https://img.shields.io/github/languages/top/flaviagiammarino/tcan-tensorflow?color=3672be)
+![license](https://img.shields.io/github/license/flaviagiammarino/tcan-tensorflow)
+![languages](https://img.shields.io/github/languages/top/flaviagiammarino/tcan-tensorflow)
 
 TensorFlow implementation of multivariate time series forecasting model introduced in Lin, Y., Koprinska, I., 
 and Rana, M. (2021). Temporal Convolutional Attention Neural Networks for Time Series Forecasting. In *2021 International
-Joint Conference on Neural Networks (IJCNN)* (pp. 1-8). IEEE. 
-[doi:10.1109/IJCNN52387.2021.9534351](https://doi.org/10.1109/IJCNN52387.2021.9534351).
+Joint Conference on Neural Networks (IJCNN)* (pp. 1-8). IEEE.
 
 ## Dependencies
 ```bash
-pandas==1.5.1
-numpy==1.23.3
-tensorflow==2.9.1
-tensorflow_probability==0.17.0
-tensorflow_addons==0.17.1
-plotly==5.10.0
+pandas==1.5.2
+numpy==1.23.5
+tensorflow==2.11.0
+tensorflow_probability==0.19.0
+tensorflow_addons==0.19.0
+plotly==5.11.0
 kaleido==0.2.1
 ```
 ## Usage
 ```python
 import numpy as np
-from tcan_tensorflow.model import TCAN
 
-# Generate two time series
-N = 1000
+from tcan_tensorflow.model import TCAN
+from tcan_tensorflow.plots import plot
+
+# Generate some time series
+N = 500
 t = np.linspace(0, 1, N)
-e = np.random.multivariate_normal(mean=np.zeros(2), cov=np.eye(2), size=N)
-a = 40 + 30 * t + 20 * np.cos(2 * np.pi * (10 * t - 0.5)) + e[:, 0]
-b = 50 + 40 * t + 30 * np.cos(2 * np.pi * (20 * t - 0.5)) + e[:, 1]
-y = np.hstack([a.reshape(- 1, 1), b.reshape(- 1, 1)])
+e = np.random.multivariate_normal(mean=np.zeros(3), cov=np.eye(3), size=N)
+a = 10 + 10 * t + 10 * np.cos(2 * np.pi * (10 * t - 0.5)) + 1 * e[:, 0]
+b = 20 + 20 * t + 20 * np.cos(2 * np.pi * (20 * t - 0.5)) + 2 * e[:, 1]
+c = 30 + 30 * t + 30 * np.cos(2 * np.pi * (30 * t - 0.5)) + 3 * e[:, 2]
+y = np.hstack([a.reshape(-1, 1), b.reshape(-1, 1), c.reshape(-1, 1)])
 
 # Fit the model
 model = TCAN(
     y=y,
     x=None,
     forecast_period=100,
-    lookback_period=200,
-    quantiles=[0.01, 0.1, 0.5, 0.9, 0.99],
+    lookback_period=100,
+    quantiles=[0.001, 0.1, 0.5, 0.9, 0.999],
     filters=32,
     kernel_size=7,
     dilation_rates=[1, 2, 4],
@@ -52,18 +54,12 @@ model.fit(
     epochs=200,
     verbose=1
 )
+
+# Generate the forecasts
+df = model.forecast(y=y, x=None)
+
+# Plot the forecasts
+fig = plot(df=df, quantiles=[0.001, 0.1, 0.5, 0.9, 0.999])
+fig.write_image('results.png', scale=4, height=900, width=700)
 ```
-```python
-# Plot the in-sample predictions
-predictions = model.predict(index=900)
-fig = model.plot_predictions()
-fig.write_image('predictions.png', width=750, height=650)
-```
-![predictions](example/predictions.png)
-```python
-# Plot the out-of-sample forecasts
-forecasts = model.forecast()
-fig = model.plot_forecasts()
-fig.write_image('forecasts.png', width=750, height=650)
-```
-![forecasts](example/forecasts.png)
+![results](example/results.png)
