@@ -201,6 +201,7 @@ class TCAN():
     
         '''
         Generate the forecasts.
+        
         Parameters:
         __________________________________
         y: np.array.
