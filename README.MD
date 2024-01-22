@@ -9,7 +9,7 @@ TensorFlow implementation of multivariate time series forecasting model introduc
 and Rana, M. (2021). Temporal Convolutional Attention Neural Networks for Time Series Forecasting. In *2021 International
 Joint Conference on Neural Networks (IJCNN)* (pp. 1-8). IEEE.
 
-<img src=diagram.png style="width:60%;margin-top:60px;margin-bottom:30px"/>
+<img src=diagram.png style="width:60%;margin-top:70px;margin-bottom:30px"/>
 
 *Model architecture (source: [doi: 10.1109/IJCNN52387.2021.9534351](https://doi.org/10.1109/IJCNN52387.2021.9534351))*
 
