@@ -2,10 +2,16 @@
 
 ![license](https://img.shields.io/github/license/flaviagiammarino/tcan-tensorflow)
 ![languages](https://img.shields.io/github/languages/top/flaviagiammarino/tcan-tensorflow)
+![stars](https://img.shields.io/github/stars/flaviagiammarino/tcan-tensorflow)
+![forks](https://img.shields.io/github/forks/flaviagiammarino/tcan-tensorflow)
 
 TensorFlow implementation of multivariate time series forecasting model introduced in Lin, Y., Koprinska, I., 
 and Rana, M. (2021). Temporal Convolutional Attention Neural Networks for Time Series Forecasting. In *2021 International
 Joint Conference on Neural Networks (IJCNN)* (pp. 1-8). IEEE.
+
+<img src=diagram.png style="width:50%;margin-top:30px;margin-bottom:25px"/>
+
+*Model architecture (source: [doi: 10.1109/IJCNN52387.2021.9534351](https://doi.org/10.1109/IJCNN52387.2021.9534351))*
 
 ## Dependencies
 ```bash
